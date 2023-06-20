@@ -19,24 +19,30 @@ struct UserListView: View {
                     .font(.title)
                     .bold()
                 ScrollView {
-                    LazyVStack (alignment: .leading) {
+                    LazyVStack (alignment: .center) {
+                        
                         ForEach(model.users) { user in
                             NavigationLink {
-                                RepoListView(repos: user.repos)
+                                RepoListView(user: user)
                                     .onAppear{
-                                        user.getReposAPI()
+                                        if user.repos.isEmpty {
+                                            model.getReposAPI(currentPage: user.currenPage, reposUrl: user.reposUrl, id: user.id)
+                                        }
                                     }
                             } label: {
                                 UserRowView(user: user)
                             }
                         }
+                        
+                        ProgressView()
+                            .onAppear {
+                                model.loadMoreUsers()
+                            }
+                        
                     }
-                    
-                    ProgressView()
-                    
                 }
             }
-            .padding([.leading, .trailing])
+            .padding(.leading)
         }
         
     }

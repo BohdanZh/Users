@@ -6,13 +6,12 @@
 //
 
 import Foundation
-import Combine
 
 class ContentModel: ObservableObject {
     
     @Published var users = [User]()
     
-    @Published var currentPage = 1
+    @Published var currentPage = 0
     
     init() {
         
@@ -20,7 +19,7 @@ class ContentModel: ObservableObject {
         
     }
     
-    func loadMore() {
+    func loadMoreUsers() {
         
         getUsersApi(currentPage: currentPage)
         
@@ -34,7 +33,7 @@ class ContentModel: ObservableObject {
         var urlComponents = URLComponents(string: Constants.usersUrl)
         urlComponents?.queryItems = [
             URLQueryItem(name: "since", value: String(currentPage)),
-            URLQueryItem(name: "per_page", value: String(Constants.paginantionStep))
+            URLQueryItem(name: "per_page", value: String(Constants.userPaginantionStep))
         ]
         
         let url = urlComponents?.url
@@ -53,15 +52,13 @@ class ContentModel: ObservableObject {
             let session = URLSession.shared
             
             // Create Data Task
-            let dataTask = session.dataTask(with: url!) { data, response, error in
+            let dataTask = session.dataTask(with: request) { data, response, error in
                 
                 if error == nil {
                     
                     do {
                         //Parse JSON
                         let result = try JSONDecoder().decode([User].self, from: data!)
-                        print(result)
-                        print(currentPage)
                         
                         DispatchQueue.main.async {
                             
@@ -75,7 +72,7 @@ class ContentModel: ObservableObject {
                                 user.getImageData()
                             }
                             
-                            self.currentPage += Constants.paginantionStep
+                            self.currentPage += Constants.userPaginantionStep
                         }
                     }
                     catch {
@@ -89,6 +86,81 @@ class ContentModel: ObservableObject {
             // Start the Data Task
             dataTask.resume()
             
+        }
+        
+    }
+    
+    func getReposAPI(currentPage: Int, reposUrl: String?, id: Int?) {
+        
+        guard reposUrl != nil && id != nil else {
+            return
+        }
+        
+        // Create URL
+        var urlComponents = URLComponents(string: reposUrl!)
+        urlComponents?.queryItems = [
+            URLQueryItem(name: "page", value: String(currentPage)),
+            URLQueryItem(name: "per_page", value: String(Constants.repoPaginationStep))
+        ]
+        
+        let url = urlComponents?.url
+        
+        // Create request
+        if url == url {
+            
+            // Create request
+            var request = URLRequest(url: url!)
+            
+            request.httpMethod = "GET"
+            
+            request.addValue("Bearer \(Constants.apiToken)", forHTTPHeaderField: "Authorization")
+            
+            // Get URL session
+            let session = URLSession.shared
+            
+            // Create Data Task
+            let dataTask = session.dataTask(with: request) { data, response, error in
+                
+                if error == nil {
+                    
+                    do {
+                        // Parse JSON
+                        let result = try JSONDecoder().decode([Repo].self, from: data!)
+                        
+                        DispatchQueue.main.async {
+                            
+                            // Find the user by the id
+                            for user in self.users {
+                                if user.id == id {
+                                    
+                                    if result.isEmpty {
+                                        user.isReposFull = true
+                                    }
+                                    
+                                    for repo in result {
+                                        // Check if repo doesn't exist yet
+                                        if !user.repos.contains(where: { $0.id == repo.id}) {
+                                            // Add new repo
+                                            user.repos.append(repo)
+                                        }
+                                        
+                                        // TODO: Add repos to SQLite
+                                    }
+                                    
+                                    user.currenPage += Constants.repoPaginationStep
+                                    
+                                }
+                            }
+                        }
+                        
+                    }
+                    catch {
+                        print(error)
+                    }
+                    
+                }
+            }
+            dataTask.resume()
         }
         
     }
