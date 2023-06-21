@@ -13,6 +13,7 @@ struct UsersApp: App {
         WindowGroup {
             UserListView()
                 .environmentObject(ContentModel())
+                .tint(.black)
         }
     }
 }

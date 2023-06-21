@@ -22,7 +22,7 @@ struct UserRowView: View {
             Image(uiImage: uiImage ?? UIImage())
                 .resizable()
                 .frame(width: imageSize, height: imageSize)
-                .cornerRadius(20)
+                .cornerRadius(50)
                 .scaledToFit()
             
             // Username
@@ -33,6 +33,8 @@ struct UserRowView: View {
             
             Spacer()
         }
+        
+        
     }
     
 }

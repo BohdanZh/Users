@@ -9,6 +9,7 @@ import Foundation
 
 struct Converter {
     
+    // Converts string from one date format to another
     static func dateFormatConvertion(from string:String) -> String {
         
         let dateFormatter = DateFormatter()

@@ -16,25 +16,39 @@ struct RepoListView: View {
         
         VStack {
             
-            UserRowView(user: user, imageSize: 80, loginFont: .title)
-                .padding(.all)
+            ZStack(alignment: .bottom) {
+                Rectangle()
+                    .cornerRadius(10)
+                    .ignoresSafeArea()
+                    .foregroundColor(.white)
+                    .frame(height: 100)
+                    .shadow(radius: 5)
+                UserRowView(user: user, imageSize: 80, loginFont: .title)
+                    .padding(10)
+            }
+            .padding(.bottom, 5)
             
-            List {
+            ScrollView {
                 
-                ForEach(user.repos) { repo in
-                    Text(repo.name ?? "")
-                        .font(.largeTitle)
-                }
-                
-                if user.isReposFull {
-                    ProgressView()
-                        .onAppear {
-                            model.getReposAPI(currentPage: user.currenPage, reposUrl: user.reposUrl, id: user.id)
-                        }
+                LazyVStack (alignment: .center) {
+                    
+                    ForEach(user.repos) { repo in
+                        RepoRowView(repo: repo)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 5)
+                    }
+                    
+                    if user.isReposFull == false {
+                        ProgressView()
+                            .onAppear {
+                                model.getReposSQLite(id: user.id)
+                                model.getReposApi(currentPage: user.currenPage, reposUrl: user.reposUrl, id: user.id)
+                            }
+                    }
+                    
                 }
                 
             }
-            .listStyle(.plain)
         }
         
     }

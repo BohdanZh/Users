@@ -14,10 +14,13 @@ struct UserListView: View {
     var body: some View {
         
         NavigationView {
-            VStack (alignment: .leading) {
+            VStack (alignment: .center) {
+                
+                // Heading
                 Text("Users")
                     .font(.title)
                     .bold()
+                
                 ScrollView {
                     LazyVStack (alignment: .center) {
                         
@@ -26,7 +29,7 @@ struct UserListView: View {
                                 RepoListView(user: user)
                                     .onAppear{
                                         if user.repos.isEmpty {
-                                            model.getReposAPI(currentPage: user.currenPage, reposUrl: user.reposUrl, id: user.id)
+                                            model.getReposApi(currentPage: user.currenPage, reposUrl: user.reposUrl, id: user.id)
                                         }
                                     }
                             } label: {
@@ -34,15 +37,18 @@ struct UserListView: View {
                             }
                         }
                         
-                        ProgressView()
-                            .onAppear {
-                                model.loadMoreUsers()
-                            }
+                        // Check if there are more users to load
+                        if model.isUsersFull == false {
+                            ProgressView()
+                                .onAppear {
+                                    model.loadMoreUsers()
+                                }
+                        }
                         
                     }
                 }
+                .padding(.leading)
             }
-            .padding(.leading)
         }
         
     }
