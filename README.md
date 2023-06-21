@@ -12,4 +12,4 @@
 
 **Важливо:**
 Необхідно додати cocoapods з бібліотекою SQLite.swift
-pod 'SQLite.swift'
+$pod 'SQLite.swift'
